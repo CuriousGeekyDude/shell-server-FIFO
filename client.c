@@ -1,12 +1,11 @@
 #include "incl.h"
 
 int dynamicMemorySizeCal(int size) {
-    return (int)(log10((double)size));
+    return (int)(log10((double)size));  //make sure enough space is available for ptr to store Int
 }
 
 char* convertIntToString(int Int) {
-    char* ptr = malloc(dynamicMemorySizeCal(Int)); //make sure enough space is available for ptr to store Int
-    initializeBuffer(ptr, dynamicMemorySizeCal(Int));
+    char* ptr = calloc(dynamicMemorySizeCal(Int),sizeof(char)); 
     sprintf(ptr, "%d", Int);
     return ptr;
 }
@@ -23,14 +22,14 @@ int countInput() {
 
 char* createMessage(const char* PID) {
     int count = countInput();
-    char* numberOfCharOfInputBuffer = convertIntToString(count);
-    char* messageBuffer = malloc(count+16);
-    initializeBuffer(messageBuffer, count+16);
+    char* numberOfCharOfInputBuffer = convertIntToString(count-2); //not taing into account the $ delimiters
+    char* messageBuffer = calloc(count+18,sizeof(char)); //should have been +16 but because of -2 of above, we had to account for the lost 2
+    
     int index = 0;
     messageBuffer[0] = '$';
-
     for(; PID[index] != '\0'; ++index)
         messageBuffer[index] = PID[index];
+    
     messageBuffer[index] = '/';
     ++index;
 
@@ -41,7 +40,6 @@ char* createMessage(const char* PID) {
 
     messageBuffer[index] = ':';
     ++index;
-    
     for(int i = 1; i < count - 1; ++i) {
         messageBuffer[index] = inputBuffer[i];
         ++index;
@@ -56,9 +54,11 @@ int main(int argc, char* argv[])
 {
     printf("%ld\n",(long)getpid());
     char* pidString = convertIntToString(getpid());
-    char* messageBuffer = createMessage(pidString);
-    printf("%s\n", messageBuffer);
+    
+    char* message = createMessage(pidString);
+
+    printf("%s\n", message);
     free(pidString);
-    free(messageBuffer);
+    free(message);
     exit(EXIT_SUCCESS);
 }
