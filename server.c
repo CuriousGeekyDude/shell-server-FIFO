@@ -47,8 +47,9 @@ long findNumOfCharsInMessage(const char* string) {
         ++dummyVar;
         ++indexOfSlash;
     }
-
+    
     NumOfCharsInMessage = stringToNumber(NumOfCharsInMessageString);
+
     return NumOfCharsInMessage;
 
 }
@@ -73,7 +74,7 @@ char* messageReconstruct(int fdOfFIFO) {
     NumOfCharsInMessage = findNumOfCharsInMessage(message);
     
     free(message);
-
+    
     message = calloc(NumOfCharsInMessage, sizeof(char));
 
     while(read(fdOfFIFO, delimCheckBuffer, 1) > 0) {
@@ -97,9 +98,8 @@ int main(int argc, char* argv[])
         errExit("open");
 
     while(read(fdOfFIFO, delimCheckBuffer, 1) > 0) {
-        printf("%c\n", delimCheckBuffer[0]);
         message = messageReconstruct(fdOfFIFO);
-        printf("%s\n", message);
+        printf("%s\n",message);
         free(message);
         message = NULL;
         delimCheckBuffer[0] = '\0';
