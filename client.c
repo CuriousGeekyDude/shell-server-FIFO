@@ -105,8 +105,8 @@ int main(int argc, char* argv[])
         printf("%s\n", message);
         fflush(stdout);
         free(message);
+        initializeBuffer(inputBuffer, BUFFSIZE, 0);
         messageSize = 0;
-        fflush(stdin);
     }
     
     exit(EXIT_SUCCESS);
