@@ -2,12 +2,7 @@
 
 static char delimCheckBuffer[1];
 
-void initializeBuffer(char buffer[], size_t size, size_t index) {
-    for(; index < size; ++index) 
-        buffer[index] = '\0';
-}
-
-long stringToNumber(const char* string) {
+long stringToNumber(const char* string) {   //PASSED
     long number = strtol(string, NULL, 10);
     return number;
 }
@@ -26,7 +21,7 @@ pid_t findPID(const char* string) {
     return (pid_t) stringToNumber(buffer);
 }
 
-size_t findSlash(const char* string, size_t size) {
+size_t findFirstSlash(const char* string,const size_t size) {    //PASSED
     size_t indexOfSlash = 0;
 
     while(indexOfSlash < size && string[indexOfSlash] != '/')
@@ -34,15 +29,15 @@ size_t findSlash(const char* string, size_t size) {
     return indexOfSlash;
 }
 
-long findNumOfCharsInMessage(const char* string) {
+long findNumOfCharsInMessage(const char* string, const size_t sizeString) { //PASSED
     long NumOfCharsInMessage;
     char NumOfCharsInMessageString[4];
     size_t dummyVar = 0;
 
     initializeBuffer(NumOfCharsInMessageString, 4, 0);
-    size_t indexOfSlash = findSlash(string, 15)+1;
+    size_t indexOfSlash = findFirstSlash(string, sizeString)+1;
 
-    while(indexOfSlash < 15 && string[indexOfSlash] != ':') {
+    while(indexOfSlash < sizeString && string[indexOfSlash] != ':') {
         NumOfCharsInMessageString[dummyVar] = string[indexOfSlash];
         ++dummyVar;
         ++indexOfSlash;
@@ -54,7 +49,7 @@ long findNumOfCharsInMessage(const char* string) {
 
 }
 
-void readUntilColon(int fd, char* buffer, size_t index, size_t size) {
+void readUntilColon(int fd, char* buffer, size_t index, size_t size) {  //PASSED
     while(read(fd, delimCheckBuffer, 1) > 0) {
         if(index < size) {
             if(delimCheckBuffer[0] == ':') {
@@ -74,15 +69,15 @@ char* messageReconstruct(int fdOfFIFO) {
     long NumOfCharsInMessage;
     size_t index = 0;
 
-    readUntilColon(fdOfFIFO, message, 1, 15);
-    NumOfCharsInMessage = findNumOfCharsInMessage(message)+1;
+    readUntilColon(fdOfFIFO, message, index, 15);
+    NumOfCharsInMessage = findNumOfCharsInMessage(message, 15);
     free(message);
     
     message = calloc(NumOfCharsInMessage, sizeof(char));
     initializeBuffer(message, NumOfCharsInMessage, 0);
 
     while(read(fdOfFIFO, delimCheckBuffer, 1) > 0) {
-    if(index < NumOfCharsInMessage-1) {
+    if(index < NumOfCharsInMessage) {
         if(delimCheckBuffer[0] == ']')
             break;
         message[index] = delimCheckBuffer[0];
@@ -97,6 +92,7 @@ char* messageReconstruct(int fdOfFIFO) {
 
 int main(int argc, char* argv[])
 {
+    
     char* message;
     int fdOfFIFO;
 
@@ -105,10 +101,11 @@ int main(int argc, char* argv[])
     if(fdOfFIFO == -1)
         errExit("open");
 
-    while(read(fdOfFIFO, delimCheckBuffer, 1) > 0) {
+    while(1) {
         message = messageReconstruct(fdOfFIFO);
 
-        printf("%s",message);
+        printf("%s\n",message);
+        fflush(stdout);
         free(message);
         message = NULL;
         delimCheckBuffer[0] = '\0';

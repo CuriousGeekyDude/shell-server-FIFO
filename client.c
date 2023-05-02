@@ -71,6 +71,7 @@ void writeMessageIntoMessageBuff(const char* input, char* message, size_t messag
     message[*index] = ']';
 
 }
+
 char* createMessage(const char* PID) {
     int count = countInput() + 16;
     messageSize = count-16;
@@ -101,7 +102,7 @@ int main(int argc, char* argv[])
 
     while(1) {
         message = createMessage(convertIntToString(getpid()));
-        write(fdOfFIFO, message, messageSize);
+        write(fdOfFIFO, message, messageSize+13);
         printf("%s\n", message);
         fflush(stdout);
         free(message);
