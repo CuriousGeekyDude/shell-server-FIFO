@@ -5,7 +5,19 @@
 static char inputBuffer[BUFFSIZE];
 static int messageSize;
 
+void signalHandler(int sig) {
+    pid_t PID = getpid();
+    int fdFIFO;
 
+    printf("signal received\n");
+    fflush(stdout);
+    char* pathName = createFIFOPathNameClient(PID);
+    fdFIFO = open(pathName, O_RDONLY);
+    initializeBuffer(inputBuffer, BUFFSIZE, 0);
+    read(fdFIFO, inputBuffer, BUFFSIZE-1);
+    write(STDOUT_FILENO, inputBuffer, BUFFSIZE-1);
+    
+}
 
 int countInput() {
     int countNum;
@@ -81,10 +93,16 @@ char* createMessage(const char* PID) {
 
 
 int main(int argc, char* argv[])
-{
-    
+{   
+    struct sigaction sigAct;
     int fdOfFIFO;
     char* message;
+
+    memset(&sigAct, 0, sizeof(struct sigaction));
+    sigAct.sa_handler = &signalHandler;
+    if(sigaction(SIGINT, &sigAct, NULL) == -1)
+        errExit("sigaction");
+
     initializeBuffer(inputBuffer, BUFFSIZE, 0);
 
     fdOfFIFO = open(pathnameOfFIFO , O_WRONLY);

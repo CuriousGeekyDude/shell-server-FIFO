@@ -122,9 +122,34 @@ char* messageReconstruct(int fdOfFIFO) {    //PASSED
     return message;
 }
 
+
+void proccessCommand(const char* Command, pid_t PIDClient) {   //still not complete yet
+    FILE* pipe;
+    int mkFIFORes;
+    int fdFIFO;
+    char* pathName;
+    char buffer[1024];
+    initializeBuffer(buffer, 1024, 0);
+
+    pipe = popen(Command, "r");
+
+    pathName = createFIFOPathNameClient(PIDClient);
+
+    remove(pathName);
+    if(mkfifo(pathName, S_ISUID) == -1)
+        errExit("mkfifo");
+    kill(PIDClient, SIGINT);
+    fdFIFO = open(pathName, O_WRONLY);
+    
+
+    fread(buffer,sizeof(char),1023,pipe);
+    write(fdFIFO, buffer, 1023);
+
+}
+
+
 int main(int argc, char* argv[])
 {
-
     char* message;
     int fdOfFIFO;
 
@@ -141,8 +166,7 @@ indefinitely in case all of the clients disconnect from the other
 end of the FIFO.*/
 
         if(message[0] != '\0') {
-            printf("%d:%s\n",PID,message);
-            fflush(stdout);
+            proccessCommand(message, PID);
         }
 
         if(message != NULL)
