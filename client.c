@@ -5,16 +5,7 @@
 static char inputBuffer[BUFFSIZE];
 static int messageSize;
 
-int dynamicMemorySizeCal(int size) {
-    return (int)(log10((double)size));  //make sure enough space is available for ptr to store Int
-}
 
-char* convertIntToString(int Int) {
-    char* ptr = calloc(dynamicMemorySizeCal(Int),sizeof(char)); 
-    initializeBuffer(ptr, dynamicMemorySizeCal(Int), 0);
-    sprintf(ptr, "%d", Int);
-    return ptr;
-}
 
 int countInput() {
     int countNum;
