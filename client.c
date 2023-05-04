@@ -102,12 +102,13 @@ int main(int argc, char* argv[])
 
     while(1) {
         message = createMessage(convertIntToString(getpid()));
-        write(fdOfFIFO, message, messageSize+13);
+        write(fdOfFIFO, message, messageSize+16);
         printf("%s\n", message);
         fflush(stdout);
         free(message);
         initializeBuffer(inputBuffer, BUFFSIZE, 0);
         messageSize = 0;
+        message = NULL;
     }
     
     exit(EXIT_SUCCESS);
