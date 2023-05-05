@@ -4,18 +4,26 @@
 
 static char inputBuffer[BUFFSIZE];
 static int messageSize;
+static bool signalReceived;
 
 void signalHandler(int sig) {
     pid_t PID = getpid();
     int fdFIFO;
+    signalReceived = true;
 
-    printf("signal received\n");
-    fflush(stdout);
     char* pathName = createFIFOPathNameClient(PID);
     fdFIFO = open(pathName, O_RDONLY);
+
     initializeBuffer(inputBuffer, BUFFSIZE, 0);
     read(fdFIFO, inputBuffer, BUFFSIZE-1);
+    printf("\n********************************************\n");
+    fflush(stdout);
     write(STDOUT_FILENO, inputBuffer, BUFFSIZE-1);
+    printf("\n********************************************\n");
+    fflush(stdout);
+    initializeBuffer(inputBuffer,BUFFSIZE, 0);
+
+    close(fdFIFO);
     
 }
 
@@ -94,6 +102,7 @@ char* createMessage(const char* PID) {
 
 int main(int argc, char* argv[])
 {   
+    signalReceived = false;
     struct sigaction sigAct;
     int fdOfFIFO;
     char* message;
@@ -109,15 +118,23 @@ int main(int argc, char* argv[])
     if(fdOfFIFO == -1)
         errExit("open");
 
-    while(1) {
+    while(true) {
+
+        printf("root$:");
+        fflush(stdout);
         message = createMessage(convertIntToString(getpid()));
         write(fdOfFIFO, message, messageSize+16);
-        printf("%s\n", message);
-        fflush(stdout);
-        free(message);
+        
+        if(message != NULL)
+            free(message);
+
+        while(signalReceived == false)
+            sleep(1);
+
         initializeBuffer(inputBuffer, BUFFSIZE, 0);
         messageSize = 0;
         message = NULL;
+        signalReceived = false;
     }
     
     exit(EXIT_SUCCESS);

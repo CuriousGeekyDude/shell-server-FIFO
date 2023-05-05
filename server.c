@@ -131,19 +131,31 @@ void proccessCommand(const char* Command, pid_t PIDClient) {   //still not compl
     char buffer[1024];
     initializeBuffer(buffer, 1024, 0);
 
+
     pipe = popen(Command, "r");
 
     pathName = createFIFOPathNameClient(PIDClient);
 
-    remove(pathName);
-    if(mkfifo(pathName, S_ISUID) == -1)
-        errExit("mkfifo");
+    if(mkfifo(pathName, S_ISUID) == -1) 
+            errExit("mkfifo");
+
     kill(PIDClient, SIGINT);
     fdFIFO = open(pathName, O_WRONLY);
     
+    if(fdFIFO == -1) {
+        remove(pathName);
+        errExit("open");
+    }
 
     fread(buffer,sizeof(char),1023,pipe);
-    write(fdFIFO, buffer, 1023);
+    
+    if(write(fdFIFO, buffer, 1023) == -1) {
+        remove(pathName);
+        errExit("write");
+    }
+    pclose(pipe);
+    sleep(1);
+    remove(pathName);
 
 }
 
@@ -164,9 +176,13 @@ int main(int argc, char* argv[])
 /*In order to prevent the server from printing newline character
 indefinitely in case all of the clients disconnect from the other 
 end of the FIFO.*/
-
+        
         if(message[0] != '\0') {
+            printf("processing the command...\n");
+            fflush(stdout);
             proccessCommand(message, PID);
+            printf("Command was processed and the result was sent to the client with PID %d\n", PID);
+            fflush(stdout);
         }
 
         if(message != NULL)
