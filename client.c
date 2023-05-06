@@ -28,8 +28,21 @@ void signalHandler(int sig) {
 }
 
 int countInput() {
-    int countNum;
-    read(STDIN_FILENO, inputBuffer, BUFFSIZE-1);
+    int countNum = 0, labelCount = 0;
+
+    label:
+    if(labelCount == 1) {
+        printf("root$:");
+        fflush(stdout);
+        --labelCount;
+    }
+    if(read(STDIN_FILENO, inputBuffer, BUFFSIZE-1) == -1)
+        errExit("read() in countInput()");
+
+    if(inputBuffer[0] == '\n') {
+        ++labelCount;
+        goto label;
+    }
 
     for(int i = 0; inputBuffer[i] != '\0' && i < BUFFSIZE; ++i) {
         ++countNum;
@@ -84,6 +97,8 @@ void writeMessageIntoMessageBuff(const char* input, char* message, size_t messag
 }
 
 char* createMessage(const char* PID) {
+    printf("root$:");
+    fflush(stdout);
     int count = countInput() + 16;
     messageSize = count-16;
     char* numberOfCharOfInputBuffer = convertIntToString(messageSize); 
@@ -120,8 +135,6 @@ int main(int argc, char* argv[])
 
     while(true) {
 
-        printf("root$:");
-        fflush(stdout);
         message = createMessage(convertIntToString(getpid()));
         write(fdOfFIFO, message, messageSize+16);
         
