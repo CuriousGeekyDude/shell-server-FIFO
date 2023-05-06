@@ -16,7 +16,7 @@ void initializeBuffer(char buffer[], const size_t size, size_t index) {
 }
 
 int dynamicMemorySizeCal(int size) {
-    return (int)((ceil(log10((double)size)))*sizeof(char)) + 6;  //make sure enough space is available for ptr to store Int
+    return (int)(((ceil(log10((double)size)))*sizeof(char)) + 6);  //make sure enough space is available for ptr to store Int
 }
 
 char* convertIntToString(const int Int) {
