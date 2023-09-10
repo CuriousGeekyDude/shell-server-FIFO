@@ -32,7 +32,7 @@ char* createFIFOPathNameClient(const pid_t PIDClient) {
     char* pathName = malloc(35);
     initializeBuffer(pathName, 35, 0);
 
-    char buffDummy[27] = "/home/feri/Desktop/logFIFO/";
+    char buffDummy[27] = "/home/logFIFO/";
     for(int i = 0; i < 27; ++i) 
         pathName[i] = buffDummy[i];
     
