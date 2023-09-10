@@ -154,7 +154,7 @@ void proccessCommand(const char* Command, pid_t PIDClient) {   //still not compl
         errExit("write");
     }
     pclose(pipe);
-    sleep(1);
+    sleep(5);
     remove(pathName);
 
 }
